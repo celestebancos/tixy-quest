@@ -306,7 +306,7 @@ function inspectorToggle(onChange) {
 
 // "numbers on dots" buttons: print x, y or i inside every dot. Remembered across pages and visits.
 function numbersHTML() {
-  return `<span class="nums">numbers on dots: ${[['', 'off'], ['x', 'x'], ['y', 'y'], ['i', 'i']]
+  return `<span class="nums">numbers on dots: ${[['', 'off'], ['t', 't'], ['i', 'i'], ['x', 'x'], ['y', 'y']]
     .map(([v, label]) => `<button class="btn small num" data-num="${v}">${label}</button>`).join('')}
     <span class="nums-note muted hidden">(too small to fit on this grid)</span></span>`
 }
@@ -514,7 +514,7 @@ function showLevel(id) {
   cleanup.push(onFrame(() => {
     const timed = you.timed || target.timed
     const t = clock.tick(timed)
-    if (!timed && !dirty) return
+    if (!timed && !dirty && you.labels !== 't') return // t numbers keep changing
     if ($spot.checked) {
       const a = gridValues(you.fn, level.size, t)
       const b = gridValues(target.fn, level.size, t)
@@ -651,7 +651,7 @@ function showPlayground() {
 
   cleanup.push(onFrame(() => {
     const t = clock.tick(grid.timed)
-    if (!grid.timed && !dirty) return
+    if (!grid.timed && !dirty && grid.labels !== 't') return
     grid.draw(t)
     $clock.textContent = `t = ${t.toFixed(1)}`
     const now = performance.now()

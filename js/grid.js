@@ -11,7 +11,7 @@ export class Grid {
     if (label) this.canvas.setAttribute('aria-label', label)
     this.size = size
     this.picked = null
-    this.labels = null // 'x', 'y' or 'i': print that number in every dot
+    this.labels = null // 't', 'i', 'x' or 'y': print that number in every dot
     this.diffs = null
     this.onPick = onPick
     this.setCode(code)
@@ -96,7 +96,7 @@ export class Grid {
       }
       ctx.setLineDash([])
     }
-    if (this.labels && this.labelsFit()) this.drawLabels(values)
+    if (this.labels && this.labelsFit()) this.drawLabels(values, t)
     if (this.picked) {
       const { x, y } = this.picked
       ctx.strokeStyle = COLORS.pick
@@ -109,8 +109,9 @@ export class Grid {
   }
 
   labelFont() {
-    const biggest = this.labels === 'i' ? this.size * this.size - 1 : this.size - 1
-    return Math.min(this.cell * 0.5, this.cell * 1.15 / String(biggest).length)
+    // t is shown like "12.3", so leave room for 4 characters
+    const chars = this.labels === 't' ? 4 : String(this.labels === 'i' ? this.size * this.size - 1 : this.size - 1).length
+    return Math.min(this.cell * 0.5, this.cell * 1.15 / chars)
   }
 
   // Too small to read on big grids with small dots.
@@ -118,7 +119,7 @@ export class Grid {
     return !this.thumb && this.labelFont() >= 7
   }
 
-  drawLabels(values) {
+  drawLabels(values, t) {
     const { ctx, cell, size } = this
     const font = this.labelFont()
     ctx.font = `bold ${font}px ui-monospace, Menlo, Consolas, monospace`
@@ -131,7 +132,7 @@ export class Grid {
         const radius = Math.abs(v) * (cell / 2 - 1)
         // dark text on a white dot, white text on a red dot, grey on an empty spot
         const onDot = radius >= font * 0.7
-        const n = String(this.labels === 'x' ? x : this.labels === 'y' ? y : i)
+        const n = this.labels === 't' ? (t < 100 ? t.toFixed(1) : String(Math.floor(t))) : String(this.labels === 'x' ? x : this.labels === 'y' ? y : i)
         const cx = x * cell + cell / 2, cy = y * cell + cell / 2 + 1
         if (!onDot && v !== 0) {
           // a small dot peeks out behind the number: outline it so it stays readable
