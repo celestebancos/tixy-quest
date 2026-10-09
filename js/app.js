@@ -304,6 +304,31 @@ function inspectorToggle(onChange) {
   return () => $box.checked
 }
 
+// "numbers on dots" buttons: print x, y or i inside every dot. Remembered across pages and visits.
+function numbersHTML() {
+  return `<span class="nums">numbers on dots: ${[['', 'off'], ['x', 'x'], ['y', 'y'], ['i', 'i']]
+    .map(([v, label]) => `<button class="btn small num" data-num="${v}">${label}</button>`).join('')}
+    <span class="nums-note muted hidden">(too small to fit on this grid)</span></span>`
+}
+
+function wireNumbers(getGrids, onChange) {
+  let labels = store.getSetting('labels', '')
+  const show = () => {
+    const grids = getGrids()
+    grids.forEach(g => { g.labels = labels || null })
+    $app.querySelectorAll('.num').forEach(b => b.classList.toggle('active', b.dataset.num === labels))
+    $app.querySelector('.nums-note').classList.toggle('hidden', !labels || grids.every(g => g.labelsFit()))
+    onChange()
+  }
+  $app.querySelectorAll('.num').forEach(b => b.addEventListener('click', () => {
+    labels = b.dataset.num
+    store.setSetting('labels', labels)
+    show()
+  }))
+  show()
+  return show // call again when the grids are replaced
+}
+
 function inspectorHTML({ cell, t, size, code, target, showBinary }) {
   const vars = { t: Math.round(t * 100) / 100, i: cell.i, x: cell.x, y: cell.y }
   const usesT = usesTime(code) || (target && usesTime(target))
@@ -364,6 +389,8 @@ function showLevel(id) {
       ${level.hint ? `<button class="btn small" id="hint-btn">? hint</button>` : ''}
       <label class="check"><input type="checkbox" id="spot"> spot the difference</label>
       <label class="check"><input type="checkbox" id="inspect-on"> dot inspector</label>
+    </div>
+    <div class="row">${numbersHTML()}
     </div>
     <p class="hint hidden">${level.hint === true ? `<code>${esc(level.code)}</code>` : esc(level.hint || '')}</p>
     ${level.outro ? `<p class="outro hidden">${level.outro}</p>` : ''}
@@ -475,6 +502,7 @@ function showLevel(id) {
   })
   $app.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () => openEntry(b.dataset.entry)))
 
+  wireNumbers(() => [you, target], () => { dirty = true })
   const inspecting = inspectorToggle(on => {
     if (!on) picked = you.picked = target.picked = null
     $inspect.innerHTML = '<p class="muted">Click any dot on either grid to see its numbers and why it\'s on or off.</p>'
@@ -538,6 +566,7 @@ function showPlayground() {
     <p class="status"></p>
     <div class="row"><button class="btn" id="keep">💾 Save to my creations</button>
       <label class="check"><input type="checkbox" id="inspect-on"> dot inspector</label></div>
+    <div class="row">${numbersHTML()}</div>
     <section class="panel inspector"><h3>🔍 Dot inspector</h3><div class="inspect-body"><p class="muted">Click any dot.</p></div></section>
     <section class="panel"><h3>My creations</h3><div class="mine"></div></section>
     <section class="panel"><h3>Cool examples to change</h3><div class="gallery"></div></section>`
@@ -560,6 +589,7 @@ function showPlayground() {
     picked = null
     $inspect.innerHTML = '<p class="muted">Click any dot.</p>'
     $app.querySelectorAll('.size').forEach(b => b.classList.toggle('active', +b.dataset.size === size))
+    refreshNumbers?.()
     dirty = true
   }
 
@@ -612,7 +642,9 @@ function showPlayground() {
     if (!on && grid) { picked = grid.picked = null; $inspect.innerHTML = '<p class="muted">Click any dot.</p>' }
     dirty = true
   })
+  let refreshNumbers = null
   makeGrid()
+  refreshNumbers = wireNumbers(() => [grid], () => { dirty = true })
   $input.value = code
   setCode()
   renderMine()

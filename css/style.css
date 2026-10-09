@@ -99,7 +99,8 @@ h2 { color: var(--green); margin: 32px 0 12px; font-size: 22px; }
 canvas.grid { display: block; border-radius: 6px; }
 canvas.pickable { cursor: crosshair; }
 .timebar { text-align: center; color: var(--green); margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
-.sizes, .speeds { color: var(--muted); }
+.sizes, .speeds, .nums { color: var(--muted); font-size: 15px; }
+.nums .btn { margin-left: 2px; min-width: 2.2em; }
 .speeds .btn { margin-left: 2px; }
 .clock { min-width: 6.5em; display: inline-block; }
 #t-play { min-width: 6.5em; }
