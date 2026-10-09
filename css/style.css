@@ -122,7 +122,8 @@ input.code:focus { border-color: var(--green); }
 .goals p.good { color: var(--green); }
 .sols { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .sol { display: flex; align-items: center; background: #000; border-radius: 8px; padding: 2px 4px 2px 2px; border: 1px solid var(--line); }
-.sol.best { border-color: var(--yellow); }
+.sol.best { border: 2px solid var(--yellow); box-shadow: 0 0 8px rgba(255, 204, 0, 0.35); }
+.best-tag { color: var(--yellow); font-size: 12px; padding-left: 8px; white-space: nowrap; }
 .sol-code { background: none; border: 0; color: var(--green); font: inherit; cursor: pointer; padding: 4px 8px; text-align: left; overflow-wrap: anywhere; }
 .sol .len { color: var(--muted); font-size: 13px; }
 .sol .len::after { content: ' ch'; }

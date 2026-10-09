@@ -57,6 +57,7 @@ export function stars(level) {
     ways: sols.length >= level.ways,
     count: sols.length,
     shortest,
+    first: sols.length ? codeLength(sols[0].code) : null,
   }
 }
 

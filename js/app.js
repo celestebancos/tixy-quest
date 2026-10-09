@@ -390,12 +390,13 @@ function showLevel(id) {
     $app.querySelector('.goals').innerHTML = `
       <p class="${s.solved ? 'good' : ''}">✔ Solve it</p>
       <p class="${s.short ? 'good' : ''}">★ Shortest known answer: <b>${level.record}</b> characters.
-        ${s.shortest !== null ? `Your shortest: <b>${s.shortest}</b>${s.beat ? ' 🏆 You beat it!' : ''}` : ''}</p>
+        ${s.shortest !== null ? `Your shortest: <b>${s.shortest}</b>${s.first > s.shortest ? ` (your first answer was ${s.first})` : ''}${s.beat ? ' 🏆 You beat it!' : ''}` : ''}</p>
       <p class="${s.ways ? 'good' : ''}">⇄ Find ${level.ways} different answers: <b>${s.count}</b> found</p>`
     const sols = store.getLevel(level.id).solutions
     const shortest = s.shortest
     $app.querySelector('.sols').innerHTML = sols.length
       ? sols.map(x => `<div class="sol ${codeLength(x.code) === shortest ? 'best' : ''}">
+          ${codeLength(x.code) === shortest ? '<span class="best-tag">🏅 your shortest</span>' : ''}
           <button class="sol-code" title="put this in the box">${esc(x.code)}</button>
           <span class="len">${codeLength(x.code)}</span>
           <button class="x" title="forget this answer" data-code="${esc(x.code)}">×</button></div>`).join('')
@@ -419,8 +420,12 @@ function showLevel(id) {
         const before = store.stars(level)
         if (store.addSolution(level.id, saving)) {
           const after = store.stars(level)
-          if (after.beat && !before.beat) toast('🏆 New record! Shorter than the shortest known answer!')
-          else if (after.short && !before.short) toast('★ You matched the shortest known answer!')
+          // shorter than every answer he had before (not counting his very first answer)
+          const best = before.solved && after.shortest < before.shortest
+          const drop = best ? ` (${before.shortest} → ${after.shortest} characters)` : ''
+          if (after.beat && !before.beat) toast(`🏆 New record! Shorter than the shortest known answer!${drop}`)
+          else if (after.short && !before.short) toast(`★ You matched the shortest known answer!${drop}`)
+          else if (best) toast(`🎉 New personal best! ${before.shortest} → ${after.shortest} characters`)
           else if (after.ways && !before.ways) toast(`⇄ ${after.count} different answers!`)
           else if (after.count > 1) toast(`New answer! That's ${after.count} different ways.`)
           else toast('✔ Solved!')
