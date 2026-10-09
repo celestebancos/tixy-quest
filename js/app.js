@@ -333,10 +333,10 @@ function inspectorHTML({ cell, t, size, code, target, showBinary }) {
   const vars = { t: Math.round(t * 100) / 100, i: cell.i, x: cell.x, y: cell.y }
   const usesT = usesTime(code) || (target && usesTime(target))
   let html = `<div class="vars">
-    <span><b>x</b> = ${cell.x}${showBinary ? ` <small>(${binary(cell.x)})</small>` : ''}</span>
-    <span><b>y</b> = ${cell.y}${showBinary ? ` <small>(${binary(cell.y)})</small>` : ''}</span>
+    ${usesT ? `<span><b>t</b> = ${vars.t.toFixed(1)}</span>` : ''}
     <span><b>i</b> = ${cell.i}${showBinary ? ` <small>(${binary(cell.i)})</small>` : ''}</span>
-    ${usesT ? `<span><b>t</b> = ${vars.t.toFixed(1)}</span>` : ''}</div>`
+    <span><b>x</b> = ${cell.x}${showBinary ? ` <small>(${binary(cell.x)})</small>` : ''}</span>
+    <span><b>y</b> = ${cell.y}${showBinary ? ` <small>(${binary(cell.y)})</small>` : ''}</span></div>`
   if (code && code.trim()) {
     const tree = breakdown(code, vars)
     const d = describeValue(tree.raw)
