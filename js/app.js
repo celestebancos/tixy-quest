@@ -60,6 +60,7 @@ function groupProgress(group) {
 function route() {
   cleanup.forEach(fn => fn())
   cleanup = []
+  $app.classList.remove('no-inspect')
   closeModal()
   const parts = decodeURIComponent(location.hash.slice(2)).split('/')
   const [page, ...rest] = parts
@@ -181,6 +182,19 @@ function renderNode(node, top = true) {
   return html + '</div>'
 }
 
+// The "dot inspector" checkbox. Remembered across pages and visits.
+function inspectorToggle(onChange) {
+  const $box = $app.querySelector('#inspect-on')
+  const apply = () => {
+    $app.classList.toggle('no-inspect', !$box.checked)
+    onChange($box.checked)
+  }
+  $box.checked = store.getSetting('inspector', true)
+  $box.addEventListener('change', () => { store.setSetting('inspector', $box.checked); apply() })
+  apply()
+  return () => $box.checked
+}
+
 function inspectorHTML({ cell, t, size, code, target, showBinary }) {
   const vars = { t: Math.round(t * 100) / 100, i: cell.i, x: cell.x, y: cell.y }
   const usesT = usesTime(code) || (target && usesTime(target))
@@ -240,6 +254,7 @@ function showLevel(id) {
     <div class="row">
       ${level.hint ? `<button class="btn small" id="hint-btn">? hint</button>` : ''}
       <label class="check"><input type="checkbox" id="spot"> spot the difference</label>
+      <label class="check"><input type="checkbox" id="inspect-on"> dot inspector</label>
     </div>
     <p class="hint hidden">${level.hint === true ? `<code>${esc(level.code)}</code>` : esc(level.hint || '')}</p>
     ${level.outro ? `<p class="outro hidden">${level.outro}</p>` : ''}
@@ -250,6 +265,7 @@ function showLevel(id) {
   const px = gridPixels(2)
   let picked = null
   const pick = cell => {
+    if (!inspecting()) return
     picked = cell
     you.picked = target.picked = cell
     dirty = true
@@ -345,6 +361,11 @@ function showLevel(id) {
   })
   $app.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () => openEntry(b.dataset.entry)))
 
+  const inspecting = inspectorToggle(on => {
+    if (!on) picked = you.picked = target.picked = null
+    $inspect.innerHTML = '<p class="muted">Click any dot on either grid to see its numbers and why it\'s on or off.</p>'
+    dirty = true
+  })
   renderGoals()
   check()
 
@@ -401,7 +422,8 @@ function showPlayground() {
       <span class="sizes">grid: ${[8, 16, 32].map(s => `<button class="btn small size" data-size="${s}">${s}×${s}</button>`).join('')}</span></div>
     <input class="code" id="code" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="your code">
     <p class="status"></p>
-    <div class="row"><button class="btn" id="keep">💾 Save to my creations</button></div>
+    <div class="row"><button class="btn" id="keep">💾 Save to my creations</button>
+      <label class="check"><input type="checkbox" id="inspect-on"> dot inspector</label></div>
     <section class="panel inspector"><h3>🔍 Dot inspector</h3><div class="inspect-body"><p class="muted">Click any dot.</p></div></section>
     <section class="panel"><h3>My creations</h3><div class="mine"></div></section>
     <section class="panel"><h3>Cool examples to change</h3><div class="gallery"></div></section>`
@@ -417,7 +439,7 @@ function showPlayground() {
   let grid
 
   function makeGrid() {
-    grid = new Grid({ size, code, px: gridPixels(1), onPick: cell => { picked = cell; grid.picked = cell; dirty = true } })
+    grid = new Grid({ size, code, px: gridPixels(1), onPick: cell => { if (!inspecting()) return; picked = cell; grid.picked = cell; dirty = true } })
     const host = $app.querySelector('.g-play')
     host.innerHTML = ''
     host.append(grid.canvas)
@@ -472,6 +494,10 @@ function showPlayground() {
     if (store.addCreation(code.trim(), size)) { toast('💾 Saved!'); renderMine() } else toast('Already saved.')
   })
 
+  const inspecting = inspectorToggle(on => {
+    if (!on && grid) { picked = grid.picked = null; $inspect.innerHTML = '<p class="muted">Click any dot.</p>' }
+    dirty = true
+  })
   makeGrid()
   $input.value = code
   setCode()

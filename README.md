@@ -14,6 +14,7 @@ Grew out of the tixy page on the kids' links site, which was based on
 - **Dot inspector**: click any dot to see its `x`, `y`, `i` and `t`, the code with the numbers
   filled in, and each `||` / `&&` piece's value, so you can see *why* a dot is on.
 - **Spot the difference**: outlines the dots that don't match the target yet.
+- Both the inspector and spot-the-difference are checkboxes under the code box. The inspector setting is remembered.
 - **Dictionary**: every bit of syntax with a short explanation and live examples.
 - **Playground**: free play on 8×8, 16×16 or 32×32 grids, with examples and saved creations.
 - **Backups**: progress lives in the browser's localStorage. The home page can save and load a backup file.

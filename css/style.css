@@ -125,6 +125,8 @@ input.code:focus { border-color: var(--green); }
 .sol .len::after { content: ' ch'; }
 
 /* inspector */
+.no-inspect .inspector { display: none; }
+.no-inspect canvas.pickable { cursor: default; }
 .vars { display: flex; gap: 18px; flex-wrap: wrap; font-size: 20px; }
 .vars b { color: var(--green); }
 .vars small { color: var(--muted); }

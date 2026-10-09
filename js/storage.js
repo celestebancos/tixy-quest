@@ -1,5 +1,5 @@
 // Saved progress lives in this browser's localStorage.
-// Shape: { levels: { [levelId]: { code, solutions: [{ code, at }] } }, creations: [{ code, size, at }] }
+// Shape: { levels: { [levelId]: { code, solutions: [{ code, at }] } }, creations: [{ code, size, at }], settings: {} }
 import { normalize, codeLength } from './engine.js'
 
 const KEY = 'tixy-quest-v1'
@@ -8,9 +8,9 @@ let state = load()
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY))
-    if (s && typeof s === 'object') return { levels: s.levels || {}, creations: s.creations || [] }
+    if (s && typeof s === 'object') return { levels: s.levels || {}, creations: s.creations || [], settings: s.settings || {} }
   } catch (e) {}
-  return { levels: {}, creations: [] }
+  return { levels: {}, creations: [], settings: {} }
 }
 
 function save() {
@@ -63,6 +63,15 @@ export function stars(level) {
 export function starCount(level) {
   const s = stars(level)
   return (s.solved ? 1 : 0) + (s.short ? 1 : 0) + (s.ways ? 1 : 0)
+}
+
+export function getSetting(name, fallback) {
+  return name in state.settings ? state.settings[name] : fallback
+}
+
+export function setSetting(name, value) {
+  state.settings[name] = value
+  save()
 }
 
 export function getCreations() {
