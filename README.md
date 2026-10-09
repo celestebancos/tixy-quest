@@ -16,7 +16,7 @@ Grew out of the tixy page on the kids' links site, which was based on
 - **Spot the difference**: outlines the dots that don't match the target yet.
 - Both the inspector and spot-the-difference are checkboxes under the code box. The inspector setting is remembered.
 - **Time controls** (for patterns that use `t`): pause, step 0.1 s back or forward, restart, speeds ¼× to 2×,
-  and an optional tick sound every 0.1 s or 1 s (whole seconds tick lower). Speed and sound settings are remembered.
+  and an optional tick sound every 0.1 s or 1 s. Speed and sound settings are remembered.
 - **Dictionary**: every bit of syntax with a short explanation and live examples.
 - **Playground**: free play on 8×8, 16×16 or 32×32 grids, with examples and saved creations.
 - **Backups**: progress lives in the browser's localStorage. The home page can save and load a backup file.

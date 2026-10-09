@@ -163,7 +163,7 @@ const STEP = 0.1 // seconds per step button press
 
 // Tick sounds, made with the Web Audio API (no sound files needed).
 let audio = null
-function tickSound(whole) {
+function tickSound() {
   try {
     audio = audio || new AudioContext()
     if (audio.state === 'suspended') audio.resume()
@@ -171,8 +171,8 @@ function tickSound(whole) {
     const osc = audio.createOscillator()
     const gain = audio.createGain()
     osc.type = 'triangle'
-    osc.frequency.value = whole ? 660 : 1320 // whole seconds get a lower, deeper tick
-    gain.gain.setValueAtTime(whole ? 0.25 : 0.12, now)
+    osc.frequency.value = 1100
+    gain.gain.setValueAtTime(0.15, now)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05)
     osc.connect(gain).connect(audio.destination)
     osc.start(now)
@@ -199,7 +199,7 @@ class Clock {
     this.last = now
     const n = this.sound ? Math.floor(this.t / this.sound + 1e-6) : null
     if (n !== this.lastTick) {
-      if (audible && n !== null && this.lastTick !== null) tickSound(this.sound === 1 || n % 10 === 0)
+      if (audible && n !== null && this.lastTick !== null) tickSound()
       this.lastTick = n
     }
     return this.t
@@ -243,7 +243,7 @@ function wireTimeControls(clock, onChange) {
     clock.sound = +b.dataset.tick
     clock.lastTick = null
     store.setSetting('tick', clock.sound)
-    if (clock.sound) tickSound(true) // a sample so you know it's on
+    if (clock.sound) tickSound() // a sample so you know it's on
     show()
   }))
   show()
