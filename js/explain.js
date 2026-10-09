@@ -61,7 +61,44 @@ export function substitute(code, vars) {
   })
 }
 
-// Build a tree of pieces: [{ code, raw, op, children }]
+const COMPARATORS = ['===', '!==', '==', '!=', '<=', '>=', '<', '>']
+// Operators that happen AFTER comparing. If one of these is at the top level,
+// the code isn't just "left compared to right", so we don't split it.
+const LOWER = ['&&', '||', '??', '?', ':', '&', '|', '^', ',', '=>']
+
+// "abs(x-3.5) < 1" -> { left: 'abs(x-3.5)', op: '<', right: '1' }
+// Only when there's exactly one comparison at the top level.
+export function splitComparison(code) {
+  let depth = 0
+  let quote = null
+  let found = null
+  for (let k = 0; k < code.length; k++) {
+    const c = code[k]
+    if (quote) {
+      if (c === '\\') k++
+      else if (c === quote) quote = null
+      continue
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; continue }
+    if (OPEN.includes(c)) { depth++; continue }
+    if (CLOSE.includes(c)) { depth--; continue }
+    if (depth !== 0) continue
+    if (code.startsWith('>>>', k)) { k += 2; continue }
+    if (code.startsWith('>>', k) || code.startsWith('<<', k) || code.startsWith('**', k)) { k += 1; continue }
+    const op = COMPARATORS.find(o => code.startsWith(o, k))
+    if (op) {
+      if (found) return null // more than one comparison, like a<b<c
+      found = { left: code.slice(0, k).trim(), op, right: code.slice(k + op.length).trim() }
+      k += op.length - 1
+      continue
+    }
+    const low = LOWER.find(o => code.startsWith(o, k))
+    if (low) return null
+  }
+  return found && found.left && found.right ? found : null
+}
+
+// Build a tree of pieces: [{ code, raw, op, children, compare }]
 export function breakdown(code, vars, depth = 0) {
   const fn = compile(code)
   const raw = fn ? rawValue(fn, vars.t, vars.i, vars.x, vars.y) : undefined
@@ -74,6 +111,15 @@ export function breakdown(code, vars, depth = 0) {
       node.op = op
       node.children = parts.map(p => breakdown(p, vars, depth + 1))
       break
+    }
+  }
+  if (!node.op) {
+    // Work out each side of a comparison, e.g. abs(x-3.5)<1 -> 0.5 < 1
+    const cmp = splitComparison(inner)
+    if (cmp) {
+      const side = s => { const f = compile(s); return f ? rawValue(f, vars.t, vars.i, vars.x, vars.y) : undefined }
+      const left = side(cmp.left), right = side(cmp.right)
+      if (left !== undefined && right !== undefined) node.compare = { op: cmp.op, left, right }
     }
   }
   return node

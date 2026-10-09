@@ -257,13 +257,29 @@ function binary(n) {
 
 const BIT_OPS = /(^|[^&])&(?!&)|(^|[^|])\|(?!\|)|\^|>>|<</
 
+function showSide(v) {
+  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : String(Math.round(v * 1000) / 1000)
+  if (typeof v === 'boolean' || v === null || v === undefined) return String(v)
+  return JSON.stringify(v) ?? String(v)
+}
+
+// "= 0.5 < 1": both sides of a comparison worked out. Skipped when it adds nothing new.
+function compareLine(node) {
+  if (!node.compare) return ''
+  const { left, op, right } = node.compare
+  const text = `${showSide(left)} ${op} ${showSide(right)}`
+  if (text.replace(/\s+/g, '') === node.withNumbers.replace(/\s+/g, '')) return ''
+  return `<div class="line sub-line">= <code>${esc(text)}</code></div>`
+}
+
 function renderNode(node, top = true) {
   const d = describeValue(node.raw)
   const val = node.ok ? `<span class="val v${Math.sign(d.value)}">${esc(d.shown)}</span>` : `<span class="val err">can't read this yet</span>`
   let html = `<div class="node">
     <div class="line"><code>${esc(node.code)}</code></div>
     ${node.withNumbers !== node.code ? `<div class="line sub-line">= <code>${esc(node.withNumbers)}</code></div>` : ''}
-    <div class="line">→ ${val}${top ? '' : ''}</div>`
+    ${compareLine(node)}
+    <div class="line">→ ${val}</div>`
   if (node.children.length) {
     const word = node.op === '||' ? 'OR' : 'AND'
     const rule = node.op === '||'
