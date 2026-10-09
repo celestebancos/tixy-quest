@@ -156,6 +156,99 @@ function showGroup(id) {
   }
 }
 
+// ---------- Time controls ----------
+
+const SPEEDS = [0.25, 0.5, 1, 2]
+const STEP = 0.1 // seconds per step button press
+
+// Tick sounds, made with the Web Audio API (no sound files needed).
+let audio = null
+function tickSound(whole) {
+  try {
+    audio = audio || new AudioContext()
+    if (audio.state === 'suspended') audio.resume()
+    const now = audio.currentTime
+    const osc = audio.createOscillator()
+    const gain = audio.createGain()
+    osc.type = 'triangle'
+    osc.frequency.value = whole ? 660 : 1320 // whole seconds get a lower, deeper tick
+    gain.gain.setValueAtTime(whole ? 0.25 : 0.12, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05)
+    osc.connect(gain).connect(audio.destination)
+    osc.start(now)
+    osc.stop(now + 0.06)
+  } catch (e) {}
+}
+// Browsers only allow sound after a click, so wake the audio up on the first one.
+document.addEventListener('pointerdown', () => { if (audio?.state === 'suspended') audio.resume() })
+
+// t that can be paused, stepped and slowed down, and can tick out loud.
+class Clock {
+  constructor() {
+    this.t = 0
+    this.playing = true
+    this.speed = store.getSetting('speed', 1)
+    this.sound = store.getSetting('tick', 0) // 0 = off, 0.1 or 1 = seconds between ticks
+    this.last = performance.now()
+    this.lastTick = null
+  }
+  // audible: whether the pattern uses t, so ticking means something
+  tick(audible = true) {
+    const now = performance.now()
+    if (this.playing) this.t += (now - this.last) / 1000 * this.speed
+    this.last = now
+    const n = this.sound ? Math.floor(this.t / this.sound + 1e-6) : null
+    if (n !== this.lastTick) {
+      if (audible && n !== null && this.lastTick !== null) tickSound(this.sound === 1 || n % 10 === 0)
+      this.lastTick = n
+    }
+    return this.t
+  }
+  reset() { this.t = 0; this.last = performance.now(); this.lastTick = null }
+  step(dt) { this.playing = false; this.t = Math.max(0, Math.round((this.t + dt) * 10) / 10) }
+}
+
+function timeControlsHTML() {
+  return `<span class="clock">t = 0.0</span>
+    <span class="tbtns">
+      <button class="btn small" id="t-back" title="step back">◀ step</button>
+      <button class="btn small" id="t-play"></button>
+      <button class="btn small" id="t-fwd" title="step forward">step ▶</button>
+      <button class="btn small" id="restart" title="back to t = 0">⟲ restart</button>
+    </span>
+    <span class="speeds">speed: ${SPEEDS.map(s => `<button class="btn small speed" data-speed="${s}">${s === 0.25 ? '¼' : s === 0.5 ? '½' : s}×</button>`).join('')}</span>
+    <span class="speeds">tick sound: ${[[0, 'off'], [0.1, 'every 0.1'], [1, 'every 1']].map(([v, label]) => `<button class="btn small tick" data-tick="${v}">${label}</button>`).join('')}</span>`
+}
+
+function wireTimeControls(clock, onChange) {
+  const $play = $app.querySelector('#t-play')
+  const show = () => {
+    $play.textContent = clock.playing ? '⏸ pause' : '▶ play'
+    $app.querySelector('.clock').textContent = `t = ${clock.t.toFixed(1)}`
+    $app.querySelectorAll('.speed').forEach(b => b.classList.toggle('active', +b.dataset.speed === clock.speed))
+    $app.querySelectorAll('.tick').forEach(b => b.classList.toggle('active', +b.dataset.tick === clock.sound))
+    onChange()
+  }
+  $play.addEventListener('click', () => { clock.tick(false); clock.playing = !clock.playing; clock.last = performance.now(); show() })
+  $app.querySelector('#t-back').addEventListener('click', () => { clock.step(-STEP); show() })
+  $app.querySelector('#t-fwd').addEventListener('click', () => { clock.step(STEP); show() })
+  $app.querySelector('#restart').addEventListener('click', () => { clock.reset(); show() })
+  $app.querySelectorAll('.speed').forEach(b => b.addEventListener('click', () => {
+    clock.tick(false)
+    clock.speed = +b.dataset.speed
+    store.setSetting('speed', clock.speed)
+    show()
+  }))
+  $app.querySelectorAll('.tick').forEach(b => b.addEventListener('click', () => {
+    clock.sound = +b.dataset.tick
+    clock.lastTick = null
+    store.setSetting('tick', clock.sound)
+    if (clock.sound) tickSound(true) // a sample so you know it's on
+    show()
+  }))
+  show()
+}
+
 // ---------- Inspector ----------
 
 function binary(n) {
@@ -248,7 +341,7 @@ function showLevel(id) {
       <figure><div class="g-you"></div><figcaption>your code</figcaption></figure>
       <figure><div class="g-target"></div><figcaption>target</figcaption></figure>
     </div>
-    <div class="timebar hidden"><span class="clock">t = 0.0</span> <button class="btn small" id="restart">⟲ restart time</button></div>
+    <div class="timebar hidden">${timeControlsHTML()}</div>
     <input class="code" id="code" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="type code here" aria-label="your code">
     <p class="status"></p>
     <div class="row">
@@ -285,7 +378,7 @@ function showLevel(id) {
   const $spot = $app.querySelector('#spot')
   $input.value = code
 
-  let start = performance.now()
+  const clock = new Clock()
   let dirty = true
   let correct = false
   let recordTimer = null
@@ -341,10 +434,10 @@ function showLevel(id) {
   $input.addEventListener('input', () => {
     code = $input.value
     store.saveCode(level.id, code)
-    start = performance.now()
+    clock.reset()
     check()
   })
-  $app.querySelector('#restart').addEventListener('click', () => { start = performance.now(); dirty = true })
+  wireTimeControls(clock, () => { dirty = true })
   $app.querySelector('#hint-btn')?.addEventListener('click', () => $app.querySelector('.hint').classList.toggle('hidden'))
   $spot.addEventListener('change', () => { dirty = true; if (!$spot.checked) you.diffs = target.diffs = null })
   $app.querySelector('.sols').addEventListener('click', e => {
@@ -370,8 +463,8 @@ function showLevel(id) {
   check()
 
   cleanup.push(onFrame(() => {
-    const t = (performance.now() - start) / 1000
     const timed = you.timed || target.timed
+    const t = clock.tick(timed)
     if (!timed && !dirty) return
     if ($spot.checked) {
       const a = gridValues(you.fn, level.size, t)
@@ -418,8 +511,8 @@ function showPlayground() {
     <h1 class="title">🧪 Playground</h1>
     <p class="center muted">Type anything! Click a dot to see why it looks the way it does.</p>
     <div class="board single"><figure><div class="g-play"></div></figure></div>
-    <div class="timebar"><span class="clock">t = 0.0</span> <button class="btn small" id="restart">⟲ restart time</button>
-      <span class="sizes">grid: ${[8, 16, 32].map(s => `<button class="btn small size" data-size="${s}">${s}×${s}</button>`).join('')}</span></div>
+    <div class="timebar">${timeControlsHTML()}</div>
+    <div class="timebar"><span class="sizes">grid: ${[8, 16, 32].map(s => `<button class="btn small size" data-size="${s}">${s}×${s}</button>`).join('')}</span></div>
     <input class="code" id="code" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="your code">
     <p class="status"></p>
     <div class="row"><button class="btn" id="keep">💾 Save to my creations</button>
@@ -433,7 +526,7 @@ function showPlayground() {
   const $inspect = $app.querySelector('.inspect-body')
   const $clock = $app.querySelector('.clock')
   let picked = null
-  let start = performance.now()
+  const clock = new Clock()
   let dirty = true
   let lastInspect = 0
   let grid
@@ -459,7 +552,7 @@ function showPlayground() {
 
   function setCode() {
     grid.setCode(code)
-    start = performance.now()
+    clock.reset()
     $status.innerHTML = grid.broken ? `<span class="muted">🤔 The computer can't read that yet.</span>` : ''
     dirty = true
   }
@@ -488,7 +581,7 @@ function showPlayground() {
 
   $app.querySelectorAll('.size').forEach(b => b.addEventListener('click', () => { size = +b.dataset.size; makeGrid() }))
   $input.addEventListener('input', () => { code = $input.value; setCode() })
-  $app.querySelector('#restart').addEventListener('click', () => { start = performance.now(); dirty = true })
+  wireTimeControls(clock, () => { dirty = true })
   $app.querySelector('#keep').addEventListener('click', () => {
     if (!compile(code)) return toast("That code doesn't work yet.")
     if (store.addCreation(code.trim(), size)) { toast('💾 Saved!'); renderMine() } else toast('Already saved.')
@@ -504,7 +597,7 @@ function showPlayground() {
   renderMine()
 
   cleanup.push(onFrame(() => {
-    const t = (performance.now() - start) / 1000
+    const t = clock.tick(grid.timed)
     if (!grid.timed && !dirty) return
     grid.draw(t)
     $clock.textContent = `t = ${t.toFixed(1)}`
