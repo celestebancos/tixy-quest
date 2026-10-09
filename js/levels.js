@@ -42,7 +42,7 @@ const mommy2 = [
   { code: 'i==6', starter: 'i==4' },
   { code: 'i==4||i==6' },
   { code: '(x==0&&y==0)||(x==7&&y==7)', starter: '(x==0||y==0)||(x==7||y==7)', hint: 'Try something like this but with some &&: (x==0||y==0)||(x==7||y==7)' },
-  { code: 'x==0||x==7||x==y', intro: `This was the last level in the old version. Now there are lots more! <3 <3 <3 Mommy` },
+  { code: 'x==0||x==7||x==y' },
 ]
 
 // The original tutorial by @JakeGMaths at mathsuniverse.com: https://www.mathsuniverse.com/tixy
@@ -192,8 +192,7 @@ const redWhite = [
   { code: '(abs(x-7.5)<2&&abs(y-7.5)<6)||(abs(y-7.5)<2&&abs(x-7.5)<6)||-1', size: 16, intro: `The flag of Switzerland 🇨🇭 on a bigger grid.` },
   { code: '-(y?abs(x-3.5)<6-y:abs(abs(x-3.5)-2)<1)', alts: ['-(y?abs(x-3.5)<6-y:x%4%3>0)', '-(y?abs(x-3.5)<6-y:x%4==1||x%4==2)'],
     hint: 'The top row is special. Use y ? (all other rows) : (top row)',
-    intro: `A red heart ❤️. This one is hard! Every row except the top one gets narrower as you go down.`,
-    outro: `Love you! ❤️ Mommy` },
+    intro: `A red heart ❤️. This one is hard! Every row except the top one gets narrower as you go down.` },
   { code: 'hypot(x-7.5,y-7.5)<8&&(floor(hypot(x-7.5,y-7.5)/2)%2||-1)', size: 16, learn: ['hypot', 'floor'],
     hint: 'hypot(x-7.5,y-7.5) is the distance from the middle. Make rings 2 wide.',
     intro: `A target 🎯! <code>hypot(a,b)</code> gives the straight-line distance, like a ruler.` },
