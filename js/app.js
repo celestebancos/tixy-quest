@@ -299,16 +299,18 @@ function samePick(a, b) {
 // Remembered across pages and visits.
 function numbersHTML() {
   return `<div class="numbar"><span class="nums-note muted hidden">too small to fit on this grid</span>
-    ${['t', 'i', 'x', 'y'].map(v => `<button class="btn small num" data-num="${v}" title="show ${v} on every dot">${v}</button>`).join('')}</div>`
+    ${['t', 'i', 'x', 'y'].map(v => `<button class="btn small num" data-num="${v}" title="show ${v} on every dot">${v}</button>`).join('')}
+    <button class="btn small num" data-num="code" title="show what your code gives for every dot">code</button></div>`
 }
 
 function wireNumbers(getGrids, onChange) {
   let labels = store.getSetting('labels', '')
   const show = () => {
     const grids = getGrids()
-    grids.forEach(g => { g.labels = labels || null })
+    // "code" only goes on your grid: on the target it would give the answer away
+    grids.forEach(g => { g.labels = labels && !(labels === 'code' && g.isTarget) ? labels : null })
     $app.querySelectorAll('.num').forEach(b => b.classList.toggle('active', b.dataset.num === labels))
-    $app.querySelector('.nums-note').classList.toggle('hidden', !labels || grids.every(g => g.labelsFit()))
+    $app.querySelector('.nums-note').classList.toggle('hidden', !labels || grids.every(g => !g.labels || g.labelsFit()))
     onChange()
   }
   $app.querySelectorAll('.num').forEach(b => b.addEventListener('click', () => {
@@ -403,6 +405,7 @@ function showLevel(id) {
   }
   const you = new Grid({ size: level.size, code, px, onPick: pick, label: 'your pattern' })
   const target = new Grid({ size: level.size, code: level.code, px, onPick: pick, label: 'target pattern' })
+  target.isTarget = true
   $app.querySelector('.g-you').append(you.canvas)
   $app.querySelector('.g-target').append(target.canvas)
 
@@ -423,6 +426,7 @@ function showLevel(id) {
   const showBinary = g.id === 'bits' || BIT_OPS.test(level.code)
 
   function renderGoals() {
+    if (!$app.contains($input)) return // he already left this level (an answer was saved just after)
     const s = store.stars(level)
     $app.querySelector('.goals').innerHTML = `
       <p class="${s.solved ? 'good' : ''}">✔ Solve it</p>

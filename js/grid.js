@@ -98,9 +98,22 @@ export class Grid {
   }
 
   labelFont() {
-    // t is shown like "12.3", so leave room for 4 characters
-    const chars = this.labels === 't' ? 4 : String(this.labels === 'i' ? this.size * this.size - 1 : this.size - 1).length
+    // t is shown like "12.3" and code values like "false", so leave room for 4 or 5 characters
+    const chars = this.labels === 't' ? 4 : this.labels === 'code' ? 5
+      : String(this.labels === 'i' ? this.size * this.size - 1 : this.size - 1).length
     return Math.min(this.cell * 0.5, this.cell * 1.15 / chars)
+  }
+
+  // What to print in one dot.
+  labelText(t, i, x, y) {
+    switch (this.labels) {
+      case 't': return t < 100 ? t.toFixed(1) : String(Math.floor(t))
+      case 'i': return String(i)
+      case 'x': return String(x)
+      case 'y': return String(y)
+      case 'code': return showValue(rawValue(this.fn, t, i, x, y))
+    }
+    return ''
   }
 
   // Too small to read on big grids with small dots.
@@ -110,18 +123,21 @@ export class Grid {
 
   drawLabels(values, t) {
     const { ctx, cell, size } = this
-    const font = this.labelFont()
-    ctx.font = `bold ${font}px ui-monospace, Menlo, Consolas, monospace`
+    const most = this.labelFont()
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     let i = 0
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         const v = values[i]
+        const n = this.labelText(t, i, x, y)
+        // short values like "1" stay big; longer ones like "false" shrink to fit
+        const font = this.labels === 'code' ? Math.min(most * 1.6, this.cell * 0.5, this.cell * 1.15 / Math.max(n.length, 1)) : most
+        ctx.font = `bold ${font}px ui-monospace, Menlo, Consolas, monospace`
         const radius = Math.abs(v) * (cell / 2 - 1)
         // dark text on a white dot, white text on a red dot, grey on an empty spot
-        const onDot = radius >= font * 0.7
-        const n = this.labels === 't' ? (t < 100 ? t.toFixed(1) : String(Math.floor(t))) : String(this.labels === 'x' ? x : this.labels === 'y' ? y : i)
+        // the text sits "on" the dot only if the dot is big enough to hold all of it
+        const onDot = radius * 2 >= Math.max(ctx.measureText(n).width, font) + 2
         const cx = x * cell + cell / 2, cy = y * cell + cell / 2 + 1
         if (!onDot && v !== 0) {
           // a small dot peeks out behind the number: outline it so it stays readable
@@ -135,6 +151,13 @@ export class Grid {
       }
     }
   }
+}
+
+// A code value as short text: true, false, 3, 0.25, -1, NaN...
+function showValue(v) {
+  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : Number.isNaN(v) ? 'NaN' : String(Math.round(v * 100) / 100)
+  if (typeof v === 'boolean' || v === undefined || v === null) return String(v)
+  return String(v).slice(0, 6)
 }
 
 // One shared animation loop. Views add a frame function and remove it when they close.
