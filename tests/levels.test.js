@@ -43,3 +43,9 @@ test('ways goals are reachable with the known answers', () => {
     if (l.ways > 2) assert.ok(l.alts.length + 1 >= l.ways, `${l.id} needs ${l.ways} ways but only knows ${l.alts.length + 1}`)
   }
 })
+
+test('starting code never already solves the level', () => {
+  for (const l of LEVELS) {
+    if (l.starter) assert.ok(!matches(l.starter, l.code, l.size), `${l.id}: starter "${l.starter}" already matches`)
+  }
+})

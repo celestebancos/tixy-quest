@@ -106,6 +106,51 @@ const tutorial = [
   { code: 'max(0, 0.1-t/10)', size: 32, intro: `Experiment and create cool stuff!` },
 ]
 
+// Fill-in-the-blank levels: part of the code is already in the box (starter),
+// and the intro says exactly what to add.
+const absSteps = [
+  { code: 'x-3<0', starter: 'x-3<', learn: ['arithmetic'], alts: ['x<3'],
+    intro: `Before <code>abs()</code>, let's look at <code>x-3</code>. In column 0 it's 0-3 = <b>-3</b>. In column 5 it's 5-3 = 2. Click some dots to check!<br><br>The code is almost done. <b>Add a number at the end</b> so the columns where <code>x-3</code> is negative (less than zero) light up.`,
+    outro: `Columns 0, 1 and 2 give -3, -2 and -1. Those are the negative ones.` },
+  { code: 'y==x-3', starter: 'y==x-', alts: ['x-y==3', 'x-3==y'],
+    intro: `This line lights up a dot when its row number is the same as <code>x</code> minus something. <b>Add the number</b> that makes the line start in column 3.`,
+    outro: `Why is there nothing on the left? Columns 0, 1 and 2 give -3, -2 and -1, and there's no row -1! Next level fixes that.` },
+  { code: 'y==abs(x-3)', starter: 'y==x-3', learn: ['abs'],
+    intro: `<code>abs()</code> rubs out the minus sign. <code>abs(-2)</code> is 2, and <code>abs(2)</code> is still 2.<br><br><b>Wrap <code>x-3</code> in <code>abs( )</code></b> and watch the missing half come back!`,
+    outro: `A V shape! <code>abs(x-3)</code> is <b>how many steps a column is from column 3</b>, whichever side it's on. Column 1 and column 5 are both 2 steps away.` },
+  { code: 'abs(x-3)==1', starter: 'abs(x-3)==', learn: ['abs'], alts: ['x==2||x==4'],
+    intro: `Remember: <code>abs(x-3)</code> means "how many steps from column 3?"<br><br><b>Add a number</b> so the two columns that are exactly 1 step from column 3 light up.` },
+  { code: 'abs(x-3)==2', starter: 'abs(x-3)==1', alts: ['x==1||x==5'],
+    intro: `Now light up the columns that are <b>2 steps</b> from column 3. You only need to <b>change one number</b>.` },
+  { code: 'abs(x-3)<2', starter: 'abs(x-3)', alts: ['abs(x-3)<=1', 'x>1&&x<5'],
+    intro: `Light up every column that is <b>less than 2 steps</b> from column 3 (that's 0 or 1 steps). <b>Add <code>&lt;</code> and a number</b> at the end.`,
+    outro: `Column 3 itself is 0 steps away, so it lights up too.` },
+  { code: 'abs(x-5)<2', starter: 'abs(x-3)<2', alts: ['x>3&&x<7'],
+    intro: `Move the stripe so its middle is <b>column 5</b>. <b>Change one number.</b>`,
+    outro: `The number after the minus sign is where the middle is.` },
+  { code: 'abs(x-5)<3', starter: 'abs(x-5)<2',
+    intro: `Make the stripe <b>wider</b>. <b>Change one number.</b>`,
+    outro: `The number after the <code>&lt;</code> is how far from the middle you can go.` },
+  { code: 'abs(y-4)<2', starter: 'abs(x-4)<2', alts: ['y>2&&y<6'],
+    intro: `Turn the stripe sideways, so it goes across instead of down. <b>Change one letter.</b>` },
+  { code: 'abs(x-3.5)<1', starter: 'abs(x-3)<1', alts: ['x==3||x==4'],
+    intro: `An 8-wide grid has no middle column! The middle is between column 3 and column 4, at <b>3.5</b>.<br><br><b>Change the 3 to 3.5</b>. Click some dots to see their distance from the middle.`,
+    outro: `Columns 3 and 4 are both 0.5 away from the middle. Now the stripe is perfectly in the centre.` },
+  { code: 'abs(x-3.5)<2', starter: 'abs(x-3.5)<', alts: ['x>1&&x<6'],
+    intro: `Make a middle stripe that is <b>4 columns wide</b>. <b>Add the number</b> at the end. Try a few!` },
+  { code: 'abs(x-3.5)>2', starter: 'abs(x-3.5)<2', alts: ['x<2||x>5'],
+    intro: `Flip it! Light up only the columns that are <b>far</b> from the middle. <b>Change one symbol.</b>` },
+  { code: 'abs(x-3.5)<1||abs(y-3.5)<1', starter: 'abs(x-3.5)<1||', alts: ['x==3||x==4||y==3||y==4'],
+    intro: `A plus sign! The middle stripe going down is already there. <b>After the <code>||</code>, add a stripe going across.</b> (Use <code>y</code>.)` },
+  { code: 'abs(x-3.5)<2&&abs(y-3.5)<2', starter: 'abs(x-3.5)<2&&', alts: ['x>1&&x<6&&y>1&&y<6'],
+    intro: `A square in the middle. A dot has to be near the middle going across <b>AND</b> near the middle going down. <b>Add the <code>y</code> part after the <code>&&</code>.</b>` },
+  { code: 'abs(x-y)<2', starter: 'abs(x-y)', learn: ['abs'], alts: ['x-y<2&&y-x<2'],
+    intro: `<code>x-y</code> is 0 on the diagonal, so <code>abs(x-y)</code> is how many steps a dot is from the diagonal.<br><br><b>Add <code>&lt;</code> and a number</b> to make a thick diagonal stripe.` },
+  { code: 'abs(x-3.5)+abs(y-3.5)<3', starter: 'abs(x-3.5)+abs(y-3.5)',
+    intro: `Last one! This adds "how far across from the middle" and "how far down from the middle". <b>Add <code>&lt;</code> and a number</b> at the end. Try different numbers and see what shape you get!`,
+    outro: `A diamond! You're ready for the Shape Workshop. 💎` },
+]
+
 const shapes = [
   { code: 'x<=y', learn: ['compare'], alts: ['y>=x', 'x<y+1', '!(x>y)'],
     intro: `A triangle! Click on some dots to see their <code>x</code> and <code>y</code>. What do all the white dots have in common?`,
@@ -289,7 +334,7 @@ const manyWays = [
 export const GROUPS = [
   { id: 'mommy1', cover: { code: 'i<38', size: 8 }, title: "Mommy's Pack 1", subtitle: 'x, y and i', difficulty: 1, levels: mommy1 },
   { id: 'mommy2', cover: { code: 'x==0||x==7||x==y', size: 8 }, title: "Mommy's Pack 2", subtitle: '|| and &&', difficulty: 1, levels: mommy2 },
-  { id: 'tutorial', cover: { code: 'sin(t-sqrt((x-15.5)**2+(y-15.5)**2))', size: 32 }, title: 'The Original Tutorial', subtitle: 'by @JakeGMaths at mathsuniverse.com', difficulty: 2, levels: tutorial },
+  { id: 'abs', cover: { code: 'y==abs(x-3)', size: 8 }, title: 'abs() Step by Step', subtitle: 'fill in the missing piece', difficulty: 2, levels: absSteps },
   { id: 'shapes', cover: { code: 'abs(x-3.5)+abs(y-3.5)==4', size: 8 }, title: 'Shape Workshop', subtitle: 'abs, max, min and drawing pictures', difficulty: 2, levels: shapes },
   { id: 'remainder', cover: { code: 'y%2==0||(x+y%4)%4==0', size: 8 }, title: 'Remainder Magic', subtitle: 'patterns that repeat with %', difficulty: 2, levels: remainder },
   { id: 'redwhite', cover: { code: '-(y?abs(x-3.5)<6-y:abs(abs(x-3.5)-2)<1)', size: 8 }, title: 'Red & White', subtitle: 'flags, -1 and ? :', difficulty: 3, levels: redWhite },
@@ -298,6 +343,7 @@ export const GROUPS = [
   { id: 'time', cover: { code: 'x==abs(floor(t*4)%14-7)||y==abs(floor(t*3)%14-7)', size: 8 }, title: 'Time Machine', subtitle: 'animate with t', difficulty: 4, levels: time },
   { id: 'bits', cover: { code: '!(x&y)', size: 16 }, title: 'Bit Magic', subtitle: 'binary, &, | and ^', difficulty: 5, levels: bits },
   { id: 'ways', cover: { code: '!(x%7&&y%7)', size: 8 }, title: 'Many Ways & Code Golf', subtitle: 'find different answers, find short answers', difficulty: 3, levels: manyWays },
+  { id: 'tutorial', cover: { code: 'sin(t-sqrt((x-15.5)**2+(y-15.5)**2))', size: 32 }, title: 'The Original Tutorial', subtitle: 'by @JakeGMaths at mathsuniverse.com', difficulty: 2, levels: tutorial },
 ]
 
 // Fill in ids, sizes and records.

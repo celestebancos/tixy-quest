@@ -6,7 +6,8 @@ Grew out of the tixy page on the kids' links site, which was based on
 
 ## What's in it
 
-- **Level packs**: Mommy's original levels, the original tutorial, and new packs:
+- **Level packs**: Mommy's original levels, an `abs()` step-by-step pack (fill in the missing piece of the code),
+  new packs, and the original tutorial at the end. The new packs:
   shapes, remainders (`%`), red & white (`-1`, `? :`), shading, big grids, animation (`t`),
   binary/bitwise, and "many ways & code golf".
 - **Saved answers**: every working answer is saved per level. Each level has three stars:

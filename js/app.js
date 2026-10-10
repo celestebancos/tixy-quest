@@ -387,6 +387,7 @@ function showLevel(id) {
     <p class="status"></p>
     <div class="row">
       ${level.hint ? `<button class="btn small" id="hint-btn">? hint</button>` : ''}
+      ${level.starter ? `<button class="btn small" id="start-over" title="put the starting code back">↺ start over</button>` : ''}
       <label class="check"><input type="checkbox" id="spot"> spot the difference</label>
       <label class="check"><input type="checkbox" id="inspect-on"> dot inspector</label>
     </div>
@@ -486,6 +487,11 @@ function showLevel(id) {
     check()
   })
   wireTimeControls(clock, () => { dirty = true })
+  $app.querySelector('#start-over')?.addEventListener('click', () => {
+    $input.value = level.starter
+    $input.dispatchEvent(new Event('input'))
+    $input.focus()
+  })
   $app.querySelector('#hint-btn')?.addEventListener('click', () => $app.querySelector('.hint').classList.toggle('hidden'))
   $spot.addEventListener('change', () => { dirty = true; if (!$spot.checked) you.diffs = target.diffs = null })
   $app.querySelector('.sols').addEventListener('click', e => {
