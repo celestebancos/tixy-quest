@@ -102,6 +102,9 @@ canvas.pickable { cursor: crosshair; }
 .timebar { text-align: center; color: var(--green); margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sizes, .speeds { color: var(--muted); font-size: 15px; }
 .numbar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin: 8px 0 0; }
+.gridbar { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.gridbar .numbar { margin: 0; }
+#diff-btn.active { background: var(--yellow); color: #000; }
 .numbar .btn { min-width: 2.4em; }
 .nums-note { font-size: 13px; margin-right: 6px; }
 .speeds .btn { margin-left: 2px; }

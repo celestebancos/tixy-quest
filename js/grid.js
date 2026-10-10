@@ -1,7 +1,7 @@
 // Draws a tixy grid on a canvas, and tells you which dot was clicked.
 import { compile, rawValue, dotValue, usesTime } from './engine.js'
 
-const COLORS = { bg: '#000', pip: '#333', white: '#fff', red: '#ff3b3b', pick: '#0f0' }
+const COLORS = { bg: '#000', pip: '#333', white: '#fff', red: '#ff3b3b', pick: '#0f0', diff: '#ffcc00' }
 
 export class Grid {
   constructor({ size = 8, code = '', px = 300, onPick = null, label = '', thumb = false } = {}) {
@@ -11,6 +11,7 @@ export class Grid {
     if (label) this.canvas.setAttribute('aria-label', label)
     this.size = size
     this.picked = null
+    this.diffs = null // dot numbers to outline because they don't match the target
     this.labels = null // 't', 'i', 'x' or 'y': print that number in every dot
     this.onPick = onPick
     this.setCode(code)
@@ -85,6 +86,18 @@ export class Grid {
     ctx.fillStyle = COLORS.red
     ctx.fill(red)
 
+    if (this.diffs) {
+      // a yellow ring around each dot that doesn't match yet
+      ctx.strokeStyle = COLORS.diff
+      ctx.lineWidth = Math.max(2, cell / 14)
+      const ring = new Path2D()
+      for (const k of this.diffs) {
+        const cx = (k % size) * cell + cell / 2, cy = Math.floor(k / size) * cell + cell / 2
+        ring.moveTo(cx + cell / 2 - ctx.lineWidth / 2, cy)
+        ring.arc(cx, cy, cell / 2 - ctx.lineWidth / 2, 0, Math.PI * 2)
+      }
+      ctx.stroke(ring)
+    }
     if (this.labels && this.labelsFit()) this.drawLabels(values, t)
     if (this.picked) {
       const { x, y } = this.picked

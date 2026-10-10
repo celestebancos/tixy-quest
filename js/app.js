@@ -1,6 +1,6 @@
 import { GROUPS, findLevel } from './levels.js'
 import { SECTIONS, findEntry } from './dictionary.js'
-import { compile, matches, usesTime, codeLength, describeValue, rawValue } from './engine.js'
+import { compile, gridValues, matches, usesTime, codeLength, describeValue, rawValue } from './engine.js'
 import { breakdown } from './explain.js'
 import { Grid, onFrame, thumbnail } from './grid.js'
 import * as store from './storage.js'
@@ -372,7 +372,10 @@ function showLevel(id) {
     <div class="level-layout"><div class="level-main">
     ${level.intro ? `<p class="intro">${level.intro}</p>` : ''}
     ${learn.length ? `<p class="learn">📖 ${learn.map(e => `<button class="chip" data-entry="${e.id}">${esc(e.term)}</button>`).join(' ')}</p>` : ''}
-    ${numbersHTML()}
+    <div class="gridbar">
+      <button class="btn small" id="diff-btn" title="outline the dots on your grid that don't match the target yet">diff</button>
+      ${numbersHTML()}
+    </div>
     <div class="board">
       <figure><div class="g-you"></div><figcaption>your code</figcaption></figure>
       <figure><div class="g-target"></div><figcaption>target</figcaption></figure>
@@ -491,6 +494,15 @@ function showLevel(id) {
   })
   $app.querySelector('#hint-btn')?.addEventListener('click', () => $app.querySelector('.hint').classList.toggle('hidden'))
   $app.querySelector('.close-inspect').addEventListener('click', () => pick(picked))
+  // diff: outline the dots that don't match the target yet. Starts off on every level.
+  let showDiff = false
+  const $diff = $app.querySelector('#diff-btn')
+  $diff.addEventListener('click', () => {
+    showDiff = !showDiff
+    $diff.classList.toggle('active', showDiff)
+    if (!showDiff) you.diffs = null
+    dirty = true
+  })
   $app.querySelector('.sols').addEventListener('click', e => {
     const x = e.target.closest('.x')
     if (x) {
@@ -513,6 +525,11 @@ function showLevel(id) {
     const timed = you.timed || target.timed
     const t = clock.tick(timed)
     if (!timed && !dirty && you.labels !== 't') return // t numbers keep changing
+    if (showDiff) {
+      const a = gridValues(you.fn, level.size, t)
+      const b = gridValues(target.fn, level.size, t)
+      you.diffs = a.flatMap((v, k) => Math.abs(v - b[k]) > 0.002 ? [k] : [])
+    }
     you.draw(t)
     target.draw(t)
     if (timed) $clock.textContent = `t = ${t.toFixed(1)}`
