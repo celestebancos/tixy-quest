@@ -112,13 +112,30 @@ export class Grid {
 
   labelFont() {
     // t is shown like "12.3" and code values like "false", so leave room for 4 or 5 characters
-    const chars = this.labels === 't' ? 4 : this.labels === 'code' ? 5
+    const chars = this.labels === 't' ? 4 : this.showsValues() ? 5
       : String(this.labels === 'i' ? this.size * this.size - 1 : this.size - 1).length
     return Math.min(this.cell * 0.5, this.cell * 1.15 / chars)
   }
 
+  // "code" and custom buttons print values like "false" or "0.43", not just numbers
+  showsValues() {
+    return this.labels === 'code' || !!this.labels?.startsWith('#')
+  }
+
+  // Do the printed values change over time?
+  labelsMoving() {
+    if (this.labels === 't') return true
+    if (this.labels === 'code') return this.timed
+    return !!this.labels?.startsWith('#') && usesTime(this.labels.slice(1))
+  }
+
   // What to print in one dot.
   labelText(t, i, x, y) {
+    if (this.labels?.startsWith('#')) {
+      // a custom button: '#' followed by its code
+      if (this.labelCode !== this.labels) { this.labelCode = this.labels; this.labelFn = compile(this.labels.slice(1)) }
+      return showValue(rawValue(this.labelFn, t, i, x, y))
+    }
     switch (this.labels) {
       case 't': return t < 100 ? t.toFixed(1) : String(Math.floor(t))
       case 'i': return String(i)
@@ -145,7 +162,7 @@ export class Grid {
         const v = values[i]
         const n = this.labelText(t, i, x, y)
         // short values like "1" stay big; longer ones like "false" shrink to fit
-        const font = this.labels === 'code' ? Math.min(most * 1.6, this.cell * 0.5, this.cell * 1.15 / Math.max(n.length, 1)) : most
+        const font = this.showsValues() ? Math.min(most * 1.6, this.cell * 0.5, this.cell * 1.15 / Math.max(n.length, 1)) : most
         ctx.font = `bold ${font}px ui-monospace, Menlo, Consolas, monospace`
         const radius = Math.abs(v) * (cell / 2 - 1)
         // dark text on a white dot, white text on a red dot, grey on an empty spot

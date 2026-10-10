@@ -1,5 +1,5 @@
 // Saved progress lives in this browser's localStorage.
-// Shape: { levels: { [levelId]: { code, solutions: [{ code, at }] } }, creations: [{ code, size, at }], settings: {} }
+// Shape: { levels: { [levelId]: { code, solutions: [{ code, at }] } }, creations: [{ code, size, at }], settings: {}, pins: { [levelId]: [code] } }
 import { normalize, codeLength } from './engine.js'
 
 const KEY = 'tixy-quest-v1'
@@ -8,9 +8,9 @@ let state = load()
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY))
-    if (s && typeof s === 'object') return { levels: s.levels || {}, creations: s.creations || [], settings: s.settings || {} }
+    if (s && typeof s === 'object') return { levels: s.levels || {}, creations: s.creations || [], settings: s.settings || {}, pins: s.pins || {} }
   } catch (e) {}
-  return { levels: {}, creations: [], settings: {} }
+  return { levels: {}, creations: [], settings: {}, pins: {} }
 }
 
 function save() {
@@ -72,6 +72,17 @@ export function getSetting(name, fallback) {
 
 export function setSetting(name, value) {
   state.settings[name] = value
+  save()
+}
+
+// Code buttons made with "+", kept per level (and one set for the playground).
+export function getPins(key) {
+  return state.pins[key] || []
+}
+
+export function setPins(key, list) {
+  if (list.length) state.pins[key] = list
+  else delete state.pins[key]
   save()
 }
 

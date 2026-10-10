@@ -295,17 +295,29 @@ function samePick(a, b) {
   return a && b && a.x === b.x && a.y === b.y
 }
 
-// t/i/x/y buttons above the grids: print that number inside every dot. Tap the lit one again to turn it off.
-// Remembered across pages and visits.
+// t/i/x/y/code buttons above the grids: print that value inside every dot. Tap the lit one again to turn it off.
+// "+" turns the code in the box into a new button (kept for that level), so you can flip between
+// values like x-3 and abs(x-3). Custom buttons are labelled '#' + their code.
 function numbersHTML() {
   return `<div class="numbar"><span class="nums-note muted hidden">too small to fit on this grid</span>
     ${['t', 'i', 'x', 'y'].map(v => `<button class="btn small num" data-num="${v}" title="show ${v} on every dot">${v}</button>`).join('')}
-    <button class="btn small num" data-num="code" title="show what your code gives for every dot">code</button></div>`
+    <button class="btn small num" data-num="code" title="show what your code gives for every dot">code</button>
+    <span class="pins"></span>
+    <button class="btn small" id="pin-add" title="make a button from the code in the box">+</button></div>`
 }
 
-function wireNumbers(getGrids, onChange) {
+const shortLabel = code => code.length > 14 ? code.slice(0, 13) + '…' : code
+
+function wireNumbers(getGrids, onChange, { pinKey, getCode }) {
   let labels = store.getSetting('labels', '')
+  let pins = store.getPins(pinKey)
+  const $pins = $app.querySelector('.pins')
+
+  const renderPins = () => {
+    $pins.innerHTML = pins.map(c => `<button class="btn small num pin" data-num="#${esc(c)}" title="${esc(c)}">${esc(shortLabel(c))}<span class="unpin" title="remove this button">×</span></button>`).join('')
+  }
   const show = () => {
+    if (labels.startsWith('#') && !pins.includes(labels.slice(1))) labels = ''
     const grids = getGrids()
     // "code" only goes on your grid: on the target it would give the answer away
     grids.forEach(g => { g.labels = labels && !(labels === 'code' && g.isTarget) ? labels : null })
@@ -313,11 +325,36 @@ function wireNumbers(getGrids, onChange) {
     $app.querySelector('.nums-note').classList.toggle('hidden', !labels || grids.every(g => !g.labels || g.labelsFit()))
     onChange()
   }
-  $app.querySelectorAll('.num').forEach(b => b.addEventListener('click', () => {
-    labels = b.dataset.num === labels ? '' : b.dataset.num // tap again to turn it off
-    store.setSetting('labels', labels)
+  const choose = value => {
+    labels = value === labels ? '' : value // tap again to turn it off
+    if (!labels.startsWith('#')) store.setSetting('labels', labels) // custom buttons belong to one level
     show()
-  }))
+  }
+
+  $app.querySelector('.numbar').addEventListener('click', e => {
+    const unpin = e.target.closest('.unpin')
+    const b = e.target.closest('.num')
+    if (unpin && b) {
+      pins = pins.filter(c => '#' + c !== b.dataset.num)
+      store.setPins(pinKey, pins)
+      renderPins()
+      return show()
+    }
+    if (b) choose(b.dataset.num)
+  })
+  $app.querySelector('#pin-add').addEventListener('click', () => {
+    const code = getCode().trim()
+    if (!code || !compile(code)) return toast('Type some code that works first, then press + to make it a button.')
+    if (!pins.includes(code)) {
+      pins.push(code)
+      store.setPins(pinKey, pins)
+      renderPins()
+    }
+    labels = ''
+    choose('#' + code)
+  })
+
+  renderPins()
   show()
   return show // call again when the grids are replaced
 }
@@ -517,14 +554,14 @@ function showLevel(id) {
   })
   $app.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () => openEntry(b.dataset.entry)))
 
-  wireNumbers(() => [you, target], () => { dirty = true })
+  wireNumbers(() => [you, target], () => { dirty = true }, { pinKey: level.id, getCode: () => code })
   renderGoals()
   check()
 
   cleanup.push(onFrame(() => {
     const timed = you.timed || target.timed
     const t = clock.tick(timed)
-    if (!timed && !dirty && you.labels !== 't') return // t numbers keep changing
+    if (!timed && !dirty && !you.labelsMoving() && !target.labelsMoving()) return
     if (showDiff) {
       const a = gridValues(you.fn, level.size, t)
       const b = gridValues(target.fn, level.size, t)
@@ -653,14 +690,14 @@ function showPlayground() {
   $app.querySelector('.close-inspect').addEventListener('click', () => pick(null))
   let refreshNumbers = null
   makeGrid()
-  refreshNumbers = wireNumbers(() => [grid], () => { dirty = true })
+  refreshNumbers = wireNumbers(() => [grid], () => { dirty = true }, { pinKey: 'playground', getCode: () => code })
   $input.value = code
   setCode()
   renderMine()
 
   cleanup.push(onFrame(() => {
     const t = clock.tick(grid.timed)
-    if (!grid.timed && !dirty && grid.labels !== 't') return
+    if (!grid.timed && !dirty && !grid.labelsMoving()) return
     grid.draw(t)
     $clock.textContent = `t = ${t.toFixed(1)}`
     const now = performance.now()
