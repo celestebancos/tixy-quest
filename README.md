@@ -10,13 +10,12 @@ Grew out of the tixy page on the kids' links site, which was based on
   new packs, and the original tutorial at the end. The new packs:
   shapes, remainders (`%`), red & white (`-1`, `? :`), shading, big grids, animation (`t`),
   binary/bitwise, and "many ways & code golf".
-- **Saved answers**: every working answer is saved per level. Each level has three stars:
+- **Saved answers**: every working answer is saved per level, in a rail on the right on wide screens. Each level has three stars:
   solve it, match the shortest known answer, and find several different answers.
 - **Dot inspector**: click any dot to see its `x`, `y`, `i` and `t`, the code with the numbers
   filled in, and each `||` / `&&` piece's value, so you can see *why* a dot is on.
-- **Spot the difference**: outlines the dots that don't match the target yet.
-- Both the inspector and spot-the-difference are checkboxes under the code box. The inspector setting is remembered.
-- **Numbers on dots**: print `t`, `i`, `x` or `y` inside every dot on both grids. `t` shows the same number in every dot. (Some are too small to fit on 32×32.)
+  Tap a dot to open the inspector, and tap it again (or ×) to close it.
+- **Numbers on dots**: print `t`, `i`, `x` or `y` inside every dot on both grids. `t` shows the same number in every dot. Tap the same button again to turn it off. (Some are too small to fit on 32×32.)
 - **Time controls** (for patterns that use `t`): pause, step 0.1 s back or forward, restart, speeds ¼× to 2×,
   and an optional tick sound every 0.1 s or 1 s. Speed and sound settings are remembered.
 - **Dictionary**: every bit of syntax with a short explanation and live examples.

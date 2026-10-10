@@ -1,7 +1,7 @@
 // Draws a tixy grid on a canvas, and tells you which dot was clicked.
 import { compile, rawValue, dotValue, usesTime } from './engine.js'
 
-const COLORS = { bg: '#000', pip: '#333', white: '#fff', red: '#ff3b3b', pick: '#0f0', diff: '#ffcc00' }
+const COLORS = { bg: '#000', pip: '#333', white: '#fff', red: '#ff3b3b', pick: '#0f0' }
 
 export class Grid {
   constructor({ size = 8, code = '', px = 300, onPick = null, label = '', thumb = false } = {}) {
@@ -12,7 +12,6 @@ export class Grid {
     this.size = size
     this.picked = null
     this.labels = null // 't', 'i', 'x' or 'y': print that number in every dot
-    this.diffs = null
     this.onPick = onPick
     this.setCode(code)
     this.setPixels(px)
@@ -55,7 +54,7 @@ export class Grid {
     return { x, y, i: y * this.size + x }
   }
 
-  // Returns the dot values it drew (used to spot differences).
+  // Returns the dot values it drew.
   draw(t) {
     const { ctx, cell, size } = this
     const css = cell * size
@@ -86,16 +85,6 @@ export class Grid {
     ctx.fillStyle = COLORS.red
     ctx.fill(red)
 
-    if (this.diffs) {
-      ctx.strokeStyle = COLORS.diff
-      ctx.lineWidth = Math.max(1.5, cell / 10)
-      ctx.setLineDash([3, 3])
-      for (const k of this.diffs) {
-        const x = k % size, y = Math.floor(k / size)
-        ctx.strokeRect(x * cell + 1.5, y * cell + 1.5, cell - 3, cell - 3)
-      }
-      ctx.setLineDash([])
-    }
     if (this.labels && this.labelsFit()) this.drawLabels(values, t)
     if (this.picked) {
       const { x, y } = this.picked

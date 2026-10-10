@@ -112,7 +112,6 @@ input.code {
 input.code:focus { border-color: var(--green); }
 .status { text-align: center; min-height: 1.5em; margin: 4px 0; }
 .row { display: flex; justify-content: center; gap: 16px; align-items: center; flex-wrap: wrap; }
-.check { color: var(--muted); font-size: 15px; cursor: pointer; }
 .hint { text-align: center; color: var(--yellow); }
 .outro { color: var(--green-soft); font-size: 18px; border-left: 4px solid var(--green); padding-left: 12px; }
 .outro code { color: #fff; }
@@ -130,12 +129,14 @@ input.code:focus { border-color: var(--green); }
 .sol .len::after { content: ' ch'; }
 
 /* inspector */
-.no-inspect .inspector { display: none; }
-.no-inspect canvas.pickable { cursor: default; }
-.vars { display: flex; gap: 18px; flex-wrap: wrap; font-size: 20px; }
+.inspect-body { display: flex; gap: 20px; align-items: flex-start; }
+.vars { flex: none; font-size: 20px; line-height: 1.6; border-right: 2px solid var(--line); padding-right: 16px; }
 .vars b { color: var(--green); }
-.vars small { color: var(--muted); }
-.explain { margin-top: 10px; }
+.vars small { display: block; color: var(--muted); font-size: 13px; line-height: 1; margin-bottom: 4px; }
+.inspect-main { flex: 1; min-width: 0; }
+.explain { margin-top: 0; }
+.close-inspect { float: right; }
+.tip { font-size: 14px; }
 .node .line { margin: 2px 0; }
 .node .sub-line { color: var(--muted); }
 .pieces { border-left: 2px solid var(--line); margin: 8px 0 4px 6px; padding-left: 12px; }
@@ -173,6 +174,18 @@ input.code:focus { border-color: var(--green); }
 .modal-box .close { position: absolute; top: 6px; right: 6px; }
 .toast { position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 120px); background: var(--green); color: #000; font-weight: bold; padding: 12px 20px; border-radius: 12px; transition: transform 300ms; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 .toast.show { transform: translate(-50%, 0); }
+
+/* level page: "your answers" rail on the right of wide screens */
+@media (min-width: 1100px) {
+  main.wide { max-width: 1240px; }
+  .wide .level-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+  .wide .rail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; }
+  .wide .rail .panel { margin-top: 0; }
+  .wide .rail .sols { flex-direction: column; align-items: stretch; }
+  .wide .rail .sol { flex-wrap: wrap; }
+  .wide .rail .best-tag { flex-basis: 100%; padding-top: 4px; }
+  .wide .rail .sol-code { flex: 1; }
+}
 
 @media (max-width: 560px) {
   body { font-size: 16px; }
