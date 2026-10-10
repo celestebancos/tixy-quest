@@ -93,20 +93,23 @@ h2 { color: var(--green); margin: 32px 0 12px; font-size: 22px; }
 /* level */
 .intro { font-size: 19px; }
 .learn { margin: 0 0 8px; }
-.board { display: flex; justify-content: center; gap: 16px; margin: 16px 0 4px; }
+.board { display: flex; justify-content: space-between; gap: 16px; margin: 4px 0; }
+.board.single { justify-content: center; }
 .board figure { margin: 0; text-align: center; }
 .board figcaption { color: var(--muted); font-size: 14px; }
 canvas.grid { display: block; border-radius: 6px; }
 canvas.pickable { cursor: crosshair; }
 .timebar { text-align: center; color: var(--green); margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
-.sizes, .speeds, .nums { color: var(--muted); font-size: 15px; }
-.nums .btn { margin-left: 2px; min-width: 2.2em; }
+.sizes, .speeds { color: var(--muted); font-size: 15px; }
+.numbar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin: 8px 0 0; }
+.numbar .btn { min-width: 2.4em; }
+.nums-note { font-size: 13px; margin-right: 6px; }
 .speeds .btn { margin-left: 2px; }
 .clock { min-width: 6.5em; display: inline-block; }
 #t-play { min-width: 6.5em; }
 .sizes .btn { margin-left: 4px; }
 input.code {
-  display: block; width: 100%; max-width: 560px; margin: 10px auto; font: inherit; font-size: 22px;
+  display: block; width: 100%; margin: 10px 0; font: inherit; font-size: 22px;
   padding: 10px 14px; color: var(--text); background: var(--code-bg); border: 2px solid transparent; border-radius: 10px; outline: none;
 }
 input.code:focus { border-color: var(--green); }
@@ -136,7 +139,6 @@ input.code:focus { border-color: var(--green); }
 .inspect-main { flex: 1; min-width: 0; }
 .explain { margin-top: 0; }
 .close-inspect { float: right; }
-.tip { font-size: 14px; }
 .node .line { margin: 2px 0; }
 .node .sub-line { color: var(--muted); }
 .pieces { border-left: 2px solid var(--line); margin: 8px 0 4px 6px; padding-left: 12px; }

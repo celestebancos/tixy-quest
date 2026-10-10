@@ -24,14 +24,9 @@ function toast(text) {
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400) }, 2800)
 }
 
-const RAIL_MIN = 1100 // matches the @media rule for .wide in style.css
-
-// How wide a grid can be on this screen.
-function gridPixels(columns) {
-  const page = document.documentElement.clientWidth
-  // on wide screens the level page has a right rail, so the grids get less room
-  const w = (page >= RAIL_MIN ? Math.min(page, 1240) - 344 : Math.min(page, 1000)) - 32
-  return Math.max(120, Math.min(columns === 1 ? 480 : 320, Math.floor((w - (columns - 1) * 16) / columns)))
+// How wide the playground grid can be on this screen.
+function playgroundPixels() {
+  return Math.max(120, Math.min(480, document.documentElement.clientWidth - 32))
 }
 
 // Animate a canvas thumbnail if its code uses t.
@@ -300,11 +295,11 @@ function samePick(a, b) {
   return a && b && a.x === b.x && a.y === b.y
 }
 
-// "numbers on dots" buttons: print x, y or i inside every dot. Remembered across pages and visits.
+// t/i/x/y buttons above the grids: print that number inside every dot. Tap the lit one again to turn it off.
+// Remembered across pages and visits.
 function numbersHTML() {
-  return `<span class="nums">numbers on dots: ${[['', 'off'], ['t', 't'], ['i', 'i'], ['x', 'x'], ['y', 'y']]
-    .map(([v, label]) => `<button class="btn small num" data-num="${v}">${label}</button>`).join('')}
-    <span class="nums-note muted hidden">(too small to fit on this grid)</span></span>`
+  return `<div class="numbar"><span class="nums-note muted hidden">too small to fit on this grid</span>
+    ${['t', 'i', 'x', 'y'].map(v => `<button class="btn small num" data-num="${v}" title="show ${v} on every dot">${v}</button>`).join('')}</div>`
 }
 
 function wireNumbers(getGrids, onChange) {
@@ -375,6 +370,7 @@ function showLevel(id) {
     <div class="level-layout"><div class="level-main">
     ${level.intro ? `<p class="intro">${level.intro}</p>` : ''}
     ${learn.length ? `<p class="learn">📖 ${learn.map(e => `<button class="chip" data-entry="${e.id}">${esc(e.term)}</button>`).join(' ')}</p>` : ''}
+    ${numbersHTML()}
     <div class="board">
       <figure><div class="g-you"></div><figcaption>your code</figcaption></figure>
       <figure><div class="g-target"></div><figcaption>target</figcaption></figure>
@@ -385,20 +381,19 @@ function showLevel(id) {
     <div class="row">
       ${level.hint ? `<button class="btn small" id="hint-btn">? hint</button>` : ''}
       ${level.starter ? `<button class="btn small" id="start-over" title="put the starting code back">↺ start over</button>` : ''}
-      <span class="tip muted">👆 tap a dot to inspect it</span>
-    </div>
-    <div class="row">${numbersHTML()}
     </div>
     <section class="panel inspector hidden"><h3>🔍 Dot inspector <button class="x close-inspect" title="close">×</button></h3><div class="inspect-body"></div></section>
     <p class="hint hidden">${level.hint === true ? `<code>${esc(level.code)}</code>` : esc(level.hint || '')}</p>
     ${level.outro ? `<p class="outro hidden">${level.outro}</p>` : ''}
-    <div class="next-wrap hidden">${next ? `<a class="btn go" href="${link('level/' + next.id)}">Next level ›</a>` : nextGroup ? `<a class="btn go" href="${link('group/' + nextGroup.id)}">Pack finished! Next: ${esc(nextGroup.title)} ›</a>` : `<a class="btn go" href="#/">You reached the end! 🎉</a>`}</div>
     </div>
-    <aside class="rail"><section class="panel"><h3>Your answers</h3><div class="goals"></div><div class="sols"></div></section></aside>
+    <aside class="rail"><section class="panel"><h3>Your answers</h3><div class="goals"></div><div class="sols"></div></section>
+    <div class="next-wrap hidden">${next ? `<a class="btn go" href="${link('level/' + next.id)}">Next level ›</a>` : nextGroup ? `<a class="btn go" href="${link('group/' + nextGroup.id)}">Pack finished! Next: ${esc(nextGroup.title)} ›</a>` : `<a class="btn go" href="#/">You reached the end! 🎉</a>`}</div>
+    </aside>
     </div>`
   $app.classList.add('wide')
 
-  const px = gridPixels(2)
+  // the two grids fill the width of the text column, with a 16px gap between them
+  const px = Math.floor((Math.min($app.querySelector('.level-main').clientWidth, 900) - 16) / 2)
   let picked = null
   const pick = cell => {
     picked = samePick(cell, picked) ? null : cell
@@ -551,14 +546,12 @@ function showPlayground() {
     <header class="top"><a class="back" href="#/">← Home</a></header>
     <h1 class="title">🧪 Playground</h1>
     <p class="center muted">Type anything! Click a dot to see why it looks the way it does.</p>
-    <div class="board single"><figure><div class="g-play"></div></figure></div>
+    <div class="board single"><figure>${numbersHTML()}<div class="g-play"></div></figure></div>
     <div class="timebar">${timeControlsHTML()}</div>
     <div class="timebar"><span class="sizes">grid: ${[8, 16, 32].map(s => `<button class="btn small size" data-size="${s}">${s}×${s}</button>`).join('')}</span></div>
     <input class="code" id="code" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="your code">
     <p class="status"></p>
-    <div class="row"><button class="btn" id="keep">💾 Save to my creations</button>
-      <span class="tip muted">👆 tap a dot to inspect it</span></div>
-    <div class="row">${numbersHTML()}</div>
+    <div class="row"><button class="btn" id="keep">💾 Save to my creations</button></div>
     <section class="panel inspector hidden"><h3>🔍 Dot inspector <button class="x close-inspect" title="close">×</button></h3><div class="inspect-body"></div></section>
     <section class="panel"><h3>My creations</h3><div class="mine"></div></section>
     <section class="panel"><h3>Cool examples to change</h3><div class="gallery"></div></section>`
@@ -581,7 +574,7 @@ function showPlayground() {
   }
 
   function makeGrid() {
-    grid = new Grid({ size, code, px: gridPixels(1), onPick: pick })
+    grid = new Grid({ size, code, px: playgroundPixels(), onPick: pick })
     const host = $app.querySelector('.g-play')
     host.innerHTML = ''
     host.append(grid.canvas)

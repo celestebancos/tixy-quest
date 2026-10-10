@@ -15,7 +15,7 @@ Grew out of the tixy page on the kids' links site, which was based on
 - **Dot inspector**: click any dot to see its `x`, `y`, `i` and `t`, the code with the numbers
   filled in, and each `||` / `&&` piece's value, so you can see *why* a dot is on.
   Tap a dot to open the inspector, and tap it again (or ×) to close it.
-- **Numbers on dots**: print `t`, `i`, `x` or `y` inside every dot on both grids. `t` shows the same number in every dot. Tap the same button again to turn it off. (Some are too small to fit on 32×32.)
+- **Numbers on dots**: the t / i / x / y buttons above the grids print that value inside every dot. `t` shows the same number in every dot. Tap the same button again to turn it off. (Some are too small to fit on 32×32.)
 - **Time controls** (for patterns that use `t`): pause, step 0.1 s back or forward, restart, speeds ¼× to 2×,
   and an optional tick sound every 0.1 s or 1 s. Speed and sound settings are remembered.
 - **Dictionary**: every bit of syntax with a short explanation and live examples.
