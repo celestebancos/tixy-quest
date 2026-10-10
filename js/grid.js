@@ -125,7 +125,7 @@ export class Grid {
   // Do the printed values change over time?
   labelsMoving() {
     if (this.labels === 't') return true
-    if (this.labels === 'code') return this.timed
+    if (this.labels === 'code') return (this.codeFrom || this).timed
     return !!this.labels?.startsWith('#') && usesTime(this.labels.slice(1))
   }
 
@@ -141,7 +141,8 @@ export class Grid {
       case 'i': return String(i)
       case 'x': return String(x)
       case 'y': return String(y)
-      case 'code': return showValue(rawValue(this.fn, t, i, x, y))
+      // codeFrom: another grid whose code to print here (the target shows your code's values)
+      case 'code': return showValue(rawValue((this.codeFrom || this).fn, t, i, x, y))
     }
     return ''
   }

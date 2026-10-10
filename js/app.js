@@ -319,8 +319,7 @@ function wireNumbers(getGrids, onChange, { pinKey, getCode }) {
   const show = () => {
     if (labels.startsWith('#') && !pins.includes(labels.slice(1))) labels = ''
     const grids = getGrids()
-    // "code" only goes on your grid: on the target it would give the answer away
-    grids.forEach(g => { g.labels = labels && !(labels === 'code' && g.isTarget) ? labels : null })
+    grids.forEach(g => { g.labels = labels || null })
     $app.querySelectorAll('.num').forEach(b => b.classList.toggle('active', b.dataset.num === labels))
     $app.querySelector('.nums-note').classList.toggle('hidden', !labels || grids.every(g => !g.labels || g.labelsFit()))
     onChange()
@@ -445,7 +444,7 @@ function showLevel(id) {
   }
   const you = new Grid({ size: level.size, code, px, onPick: pick, label: 'your pattern' })
   const target = new Grid({ size: level.size, code: level.code, px, onPick: pick, label: 'target pattern' })
-  target.isTarget = true
+  target.codeFrom = you // the code button prints your code's values on the target too, not the answer's
   $app.querySelector('.g-you').append(you.canvas)
   $app.querySelector('.g-target').append(target.canvas)
 

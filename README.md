@@ -18,7 +18,7 @@ Grew out of the tixy page on the kids' links site, which was based on
 - **Your own buttons**: type any code and press **+** next to the code button to make it a button for that level
   (e.g. `x-3` and `abs(x-3)`), then tap between them to compare the values on every dot. × removes one.
 - **diff**: a toggle button above the grids that rings the dots on your grid that don't match the target yet. It starts off on every level.
-- **Numbers on dots**: the t / i / x / y buttons above the grids print that value inside every dot. The **code** button prints what your code gives for each dot (true, false, 0.5…), on your grid only. `t` shows the same number in every dot. Tap the same button again to turn it off. (Some are too small to fit on 32×32.)
+- **Numbers on dots**: the t / i / x / y buttons above the grids print that value inside every dot. The **code** button prints what your code gives for each dot (true, false, 0.5…), on both grids. `t` shows the same number in every dot. Tap the same button again to turn it off. (Some are too small to fit on 32×32.)
 - **Time controls** (for patterns that use `t`): pause, step 0.1 s back or forward, restart, speeds ¼× to 2×,
   and an optional tick sound every 0.1 s or 1 s. Speed and sound settings are remembered.
 - **Dictionary**: every bit of syntax with a short explanation and live examples.
